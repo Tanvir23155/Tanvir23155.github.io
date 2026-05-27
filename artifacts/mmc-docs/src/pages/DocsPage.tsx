@@ -19,7 +19,12 @@ const NAV_ITEMS = [
   { id: "troubleshoot", label: "Troubleshooting", group: "Reference" },
 ];
 
-export default function DocsPage() {
+type Props = {
+  projectId?: string;
+  onBack?: () => void;
+};
+
+export default function DocsPage({ onBack }: Props) {
   const [activeId, setActiveId] = useState("summary");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
@@ -46,7 +51,7 @@ export default function DocsPage() {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar navItems={NAV_ITEMS} activeId={activeId} />
+      <Sidebar navItems={NAV_ITEMS} activeId={activeId} onBack={onBack} />
       <div style={{ marginLeft: 260, flex: 1, minHeight: "100vh" }}>
         <Topbar />
         <div

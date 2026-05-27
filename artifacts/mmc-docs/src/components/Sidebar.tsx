@@ -7,9 +7,10 @@ type NavItem = {
 type Props = {
   navItems: NavItem[];
   activeId: string;
+  onBack?: () => void;
 };
 
-export default function Sidebar({ navItems, activeId }: Props) {
+export default function Sidebar({ navItems, activeId, onBack }: Props) {
   const groups = Array.from(new Set(navItems.map((i) => i.group)));
 
   const handleClick = (id: string) => {
@@ -39,6 +40,31 @@ export default function Sidebar({ navItems, activeId }: Props) {
           marginBottom: 16,
         }}
       >
+        {onBack && (
+          <button
+            onClick={onBack}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#8b949e",
+              fontSize: 12,
+              padding: "0 0 12px 0",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.color = "#58a6ff")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.color = "#8b949e")
+            }
+          >
+            ← Back to Projects
+          </button>
+        )}
         <div
           style={{
             fontSize: 13,
