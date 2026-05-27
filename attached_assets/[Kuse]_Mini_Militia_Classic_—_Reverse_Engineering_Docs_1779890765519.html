@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Militia Classic — Reverse Engineering Docs</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --accent2: #3fb950;
+      --warn: #d29922;
+      --danger: #f85149;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --code-bg: #1e2a3a;
+      --code-border: #264f78;
+      --tag-bg: #1f3a5f;
+      --tag-text: #79c0ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 260px; height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 24px 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .sidebar-logo .project-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .sidebar-logo .project-version {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .nav-section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      padding: 8px 20px 4px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 7px 20px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--text);
+      background: var(--surface2);
+      border-left-color: var(--accent);
+    }
+
+    /* ── Main ── */
+    .main {
+      margin-left: 260px;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-badge {
+      font-size: 11px;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .badge-version { background: var(--tag-bg); color: var(--tag-text); }
+    .badge-arm64  { background: #1a3a2a; color: #56d364; }
+    .badge-arm32  { background: #3a1f1f; color: #ffa198; }
+    .topbar-title { font-size: 14px; font-weight: 600; color: var(--text); margin-right: auto; }
+
+    /* ── Content ── */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 40px 80px;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, #0d1f3c 0%, #1a2a4a 60%, #0d2a1f 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      margin-bottom: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .hero-eyebrow {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .hero h1 {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #e6edf3, #79c0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .hero-meta span strong { color: var(--text); }
+
+    /* Sections */
+    .section { margin-bottom: 56px; }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .section-icon {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    h2 .section-num {
+      font-size: 11px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      margin: 24px 0 10px;
+    }
+
+    p { color: #c9d1d9; margin-bottom: 12px; font-size: 14px; }
+
+    /* ── Command Block ── */
+    .cmd-block {
+      margin: 16px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--code-border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .cmd-header {
+      background: #1a3a5c;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--code-border);
+    }
+    .cmd-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #79c0ff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cmd-label::before {
+      content: '⚡';
+      font-size: 12px;
+    }
+    .cmd-copy {
+      font-size: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .cmd-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+    .cmd-body {
+      background: var(--code-bg);
+      padding: 16px 20px;
+      overflow-x: auto;
+    }
+    .cmd-body code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 13.5px;
+      color: #e6edf3;
+      white-space: pre;
+      display: block;
+    }
+    .cmd-body code .prompt { color: #56d364; user-select: none; }
+    .cmd-body code .flag   { color: #ffa657; }
+    .cmd-body code .arg    { color: #79c0ff; }
+    .cmd-body code .pipe   { color: #d2a8ff; }
+    .cmd-body code .str    { color: #a5d6ff; }
+
+    /* ── Info boxes ── */
+    .info-box {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 13.5px;
+      border-left: 4px solid;
+      display: flex;
+      gap: 12px;
+    }
+    .info-box .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .info-box.note    { background: #0d2040; border-color: var(--accent); }
+    .info-box.success { background: #0d2a1f; border-color: var(--accent2); }
+    .info-box.warn    { background: #2a1f0d; border-color: var(--warn); }
+    .info-box.danger  { background: #2a0d0d; border-color: var(--danger); }
+    .info-box p { margin: 0; color: var(--text); }
+
+    /* ── Tool grid ── */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .tool-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .tool-card .tool-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .tool-card .tool-desc { font-size: 12px; color: var(--muted); }
+
+    /* ── Phase timeline ── */
+    .phase-timeline { position: relative; padding-left: 32px; margin: 16px 0; }
+    .phase-timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent), var(--accent2));
+      border-radius: 2px;
+    }
+    .phase-item { position: relative; margin-bottom: 28px; }
+    .phase-item::before {
+      content: '';
+      position: absolute;
+      left: -28px; top: 4px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .phase-item h3 { margin-top: 0; }
+
+    /* ── Patch table ── */
+    .patch-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    .patch-table th {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+    }
+    .patch-table td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      color: var(--text);
+      vertical-align: top;
+    }
+    .patch-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+    .patch-table code {
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 12px;
+      background: var(--code-bg);
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: #ffa657;
+    }
+
+    /* ── Arch badges ── */
+    .arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+    .arch-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .arch-card .arch-title {
+      font-size: 14px; font-weight: 700; margin-bottom: 6px;
+    }
+    .arch-card.arm64 .arch-title { color: #56d364; }
+    .arch-card.arm32 .arch-title { color: #ffa198; }
+    .arch-card p { font-size: 13px; margin: 0; }
+
+    /* ── Troubleshoot list ── */
+    .trouble-list { list-style: none; padding: 0; margin: 16px 0; }
+    .trouble-list li {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      font-size: 13.5px;
+    }
+    .trouble-list li .issue { font-weight: 700; color: var(--warn); margin-bottom: 4px; }
+    .trouble-list li .fix   { color: #c9d1d9; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="project-name">Project Reverso</div>
+    <div class="project-version">MMC · v0.14.4 · May 2024</div>
+  </div>
+
+  <div class="nav-section-title">Overview</div>
+  <a href="#summary"     class="nav-link active">Executive Summary</a>
+  <a href="#environment" class="nav-link">Tech Environment</a>
+
+  <div class="nav-section-title">Phases</div>
+  <a href="#phase1" class="nav-link">Phase I — Symbol Discovery</a>
+  <a href="#phase2" class="nav-link">Phase II — Binary Patching</a>
+  <a href="#phase3" class="nav-link">Phase III — Multi-Arch</a>
+  <a href="#phase4" class="nav-link">Phase IV — APK Signing</a>
+
+  <div class="nav-section-title">Reference</div>
+  <a href="#troubleshoot" class="nav-link">Troubleshooting</a>
+</nav>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-title">Mini Militia Classic — Reverse Engineering Documentation</span>
+    <span class="topbar-badge badge-version">v0.14.4</span>
+    <span class="topbar-badge badge-arm64">ARM64-v8a</span>
+    <span class="topbar-badge badge-arm32">ARMEABI-v7a</span>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-eyebrow">Master Technical Documentation</div>
+      <h1>Mini Militia Classic (MMC)<br>Reverse Engineering Project</h1>
+      <p style="color:#8b949e;font-size:14px;margin:0;">Engine-Level Resource Modification — Native C++ Layer</p>
+      <div class="hero-meta">
+        <span><strong>Author</strong> Tanvir</span>
+        <span><strong>Date</strong> May 2024</span>
+        <span><strong>Target Library</strong> libcocos2dcpp.so</span>
+        <span><strong>Targets</strong> ARM64-v8a · ARMEABI-v7a</span>
+      </div>
+    </div>
+
+    <!-- ── 1. Executive Summary ── -->
+    <section class="section" id="summary">
+      <h2>
+        <span class="section-icon" style="background:#1a3a5c;">📋</span>
+        Executive Summary
+        <span class="section-num">§ 1</span>
+      </h2>
+      <p>
+        This project details the successful reverse engineering and modification of the Mini Militia Classic
+        C++ engine (<strong>libcocos2dcpp.so</strong>). By targeting the <em>native layer</em> rather than the
+        Smali/Java layer, we achieved stable, engine-level patches for:
+      </p>
+      <div class="tool-grid" style="margin-bottom:16px;">
+        <div class="tool-card">
+          <div class="tool-name">🔫 Unlimited Ammunition</div>
+          <div class="tool-desc">Ammo count frozen at max — synced across LAN/Multiplayer</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">⚡ Unlimited Nitro</div>
+          <div class="tool-desc">Jetpack fuel frozen at 100% — STR instruction replaced with NOP</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">🔄 Infinite Reserve</div>
+          <div class="tool-desc">Spare ammo count never decrements on reload</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">📱 Dual Architecture</div>
+          <div class="tool-desc">Supports 64-bit (ARM64-v8a) and 32-bit (ARMEABI-v7a)</div>
+        </div>
+      </div>
+      <div class="info-box note">
+        <span class="icon">ℹ️</span>
+        <p>The project specifically addresses challenges in LAN/Multiplayer synchronization and multi-architecture compatibility (supporting both modern 64-bit and legacy 32-bit devices).</p>
+      </div>
+    </section>
+
+    <!-- ── 2. Technical Environment ── -->
+    <section class="section" id="environment">
+      <h2>
+        <span class="section-icon" style="background:#1f3a1a;">🛠️</span>
+        Technical Environment &amp; Tools
+        <span class="section-num">§ 2</span>
+      </h2>
+      <div class="tool-grid">
+        <div class="tool-card">
+          <div class="tool-name">🖥️ Operating System</div>
+          <div class="tool-desc">Windows 11 / Kali Linux (WSL2)</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">🔍 Static Analysis</div>
+          <div class="tool-desc">Ghidra 11.x — ARM64 &amp; ARMv7 Disassembler</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">🔧 Binary Utilities</div>
+          <div class="tool-desc"><code style="background:var(--code-bg);color:#ffa657;padding:1px 5px;border-radius:3px;">nm</code> Symbol extraction · <code style="background:var(--code-bg);color:#ffa657;padding:1px 5px;border-radius:3px;">xxd</code> / <code style="background:var(--code-bg);color:#ffa657;padding:1px 5px;border-radius:3px;">hexedit</code> Binary patching</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">📦 APK Tooling</div>
+          <div class="tool-desc">Apktool 2.7.0 (AAPT2 enabled)</div>
+        </div>
+        <div class="tool-card">
+          <div class="tool-name">✍️ Signature Suite</div>
+          <div class="tool-desc"><code style="background:var(--code-bg);color:#ffa657;padding:1px 5px;border-radius:3px;">keytool</code> &amp; <code style="background:var(--code-bg);color:#ffa657;padding:1px 5px;border-radius:3px;">apksigner</code></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Phase I ── -->
+    <section class="section" id="phase1">
+      <h2>
+        <span class="section-icon" style="background:#1a1a3a;">🔎</span>
+        Phase I — Symbol Discovery &amp; Analysis
+        <span class="section-num">§ 3</span>
+      </h2>
+      <p>
+        The core gameplay logic is encapsulated in a shared object library. We utilized symbol extraction
+        to identify <strong>"mangled" C++ function names</strong> responsible for resource management.
+      </p>
+
+      <h3>Identify Ammunition Subtraction Logic</h3>
+      <div class="cmd-block">
+        <div class="cmd-header">
+          <span class="cmd-label">Shell Script</span>
+          <button class="cmd-copy" onclick="copyCmd(this)">Copy</button>
+        </div>
+        <div class="cmd-body">
+          <code><span class="prompt">$ </span><span class="arg">nm</span> <span class="flag">-D</span> libcocos2dcpp.so <span class="pipe">|</span> <span class="arg">grep</span> <span class="str">"subAmmo"</span></code>
+        </div>
+      </div>
+
+      <h3>Identify Nitro (Power) Management Logic</h3>
+      <div class="cmd-block">
+        <div class="cmd-header">
+          <span class="cmd-label">Shell Script</span>
+          <button class="cmd-copy" onclick="copyCmd(this)">Copy</button>
+        </div>
+        <div class="cmd-body">
+          <code><span class="prompt">$ </span><span class="arg">nm</span> <span class="flag">-D</span> libcocos2dcpp.so <span class="pipe">|</span> <span class="arg">grep</span> <span class="str">"setPower"</span></code>
+        </div>
+      </div>
+
+      <h3>Identified Target Functions</h3>
+      <table class="patch-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Function</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><code>Weapon::subAmmo(int)</code></td>
+            <td>Handles bullet reduction (called every shot)</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>SoldierLocalController::setPower(float)</code></td>
+            <td>Manages fuel levels for Nitro/Jetpack</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><code>Weapon::completeReloadWeapon()</code></td>
+            <td>Manages clip transitions on reload</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── Phase II ── -->
+    <section class="section" id="phase2">
+      <h2>
+        <span class="section-icon" style="background:#2a1a1a;">🩹</span>
+        Phase II — Native Binary Patching (Ghidra)
+        <span class="section-num">§ 4</span>
+      </h2>
+
+      <div class="phase-timeline">
+
+        <div class="phase-item">
+          <h3>4.1 — Unlimited Ammunition (LAN/Multiplayer Sync)</h3>
+          <table class="patch-table">
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>Location</td><td><code>Weapon::subAmmo</code></td></tr>
+            <tr><td>Offset</td><td><code>0x00a482e0</code></td></tr>
+            <tr><td>Logic</td><td>Master Subtractor — called during both Solo and LAN play</td></tr>
+          </table>
+          <div class="info-box success">
+            <span class="icon">🩹</span>
+            <div>
+              <p><strong>Patch:</strong> Replace the function entry instruction with <code>RET</code></p>
+              <ul style="margin: 8px 0 0 16px; font-size:13px; color:#c9d1d9;">
+                <li>64-bit patch: <code style="color:#ffa657;">C0 03 5F D6</code></li>
+                <li>32-bit patch: <code style="color:#ffa657;">1E FF 2F E1</code></li>
+              </ul>
+              <p style="margin-top:8px;"><strong>Result:</strong> The function returns immediately before subtraction occurs, ensuring ammo counts remain synchronized at maximum across the network.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <h3>4.2 — Pro-Style Reloading (Infinite Reserve)</h3>
+          <table class="patch-table">
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>Location</td><td><code>Weapon::completeReloadWeapon</code></td></tr>
+          </table>
+          <div class="info-box success">
+            <span class="icon">🩹</span>
+            <div>
+              <p><strong>Patch:</strong> Identify the call to <code>setAmmo(this, count, false)</code> at the end of the function. Replace the <strong>BL (Branch Link)</strong> instruction with <strong>NOP</strong>.</p>
+              <p style="margin-top:8px;"><strong>Result:</strong> The gun reloads and empties its clip normally, but the "Spare Ammo" count never updates/decreases.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-item">
+          <h3>4.3 — Unlimited Nitro (Jetpack)</h3>
+          <table class="patch-table">
+            <tr><th>Property</th><th>Value</th></tr>
+            <tr><td>Location</td><td><code>SoldierLocalController::setPower</code></td></tr>
+            <tr><td>Offset</td><td><code>0x009e68c4</code></td></tr>
+          </table>
+          <div class="info-box success">
+            <span class="icon">🩹</span>
+            <div>
+              <p><strong>Patch:</strong> Identify the <strong>STR (Store)</strong> instruction that writes the fuel value to memory. Replace with <strong>NOP</strong>.</p>
+              <p style="margin-top:8px;"><strong>Result:</strong> The update to the fuel variable is skipped; Nitro remains frozen at 100%.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Phase III ── -->
+    <section class="section" id="phase3">
+      <h2>
+        <span class="section-icon" style="background:#1a2a1a;">📱</span>
+        Phase III — Multi-Architecture Compatibility
+        <span class="section-num">§ 5</span>
+      </h2>
+      <p>
+        To ensure the mod works for friends with older devices, the patches must be applied to
+        <strong>both</strong> libraries contained within the APK.
+      </p>
+
+      <div class="arch-grid">
+        <div class="arch-card arm64">
+          <div class="arch-title">64-bit (arm64-v8a)</div>
+          <p>Uses <strong>RET</strong> for returns.<br>Target for modern devices (e.g., Nothing Phone).</p>
+        </div>
+        <div class="arch-card arm32">
+          <div class="arch-title">32-bit (armeabi-v7a)</div>
+          <p>Uses <strong>BX LR</strong> for returns.<br>Target for legacy/budget devices.</p>
+        </div>
+      </div>
+
+      <div class="info-box warn">
+        <span class="icon">⚠️</span>
+        <p><strong>Best Practice:</strong> If distributing to a group, mod <em>both</em> files and package them into a "Universal" APK. If only 64-bit is modded, 32-bit users will experience the original, un-modded gameplay.</p>
+      </div>
+    </section>
+
+    <!-- ── Phase IV ── -->
+    <section class="section" id="phase4">
+      <h2>
+        <span class="section-icon" style="background:#2a2a1a;">📦</span>
+        Phase IV — APK Reconstruction &amp; Signing
+        <span class="section-num">§ 6</span>
+      </h2>
+      <p>After exporting the patched <code>.so</code> files from Ghidra and replacing them in the <code>lib/</code> directory:</p>
+
+      <h3>6.1 — Building the APK</h3>
+      <p>AAPT2 is required for modern Android resource compatibility.</p>
+      <div class="cmd-block">
+        <div class="cmd-header">
+          <span class="cmd-label">Shell Script — Build APK</span>
+          <button class="cmd-copy" onclick="copyCmd(this)">Copy</button>
+        </div>
+        <div class="cmd-body">
+          <code><span class="prompt">$ </span><span class="arg">apktool</span> <span class="flag">b</span> <span class="flag">--use-aapt2</span> mod_project <span class="flag">-o</span> <span class="str">MiniMilitia_Mod.apk</span></code>
+        </div>
+      </div>
+
+      <h3>6.2 — Signing &amp; Verification</h3>
+      <p>Android will reject unsigned packages. We utilize a private <code>.jks</code> keystore.</p>
+
+      <div class="cmd-block">
+        <div class="cmd-header">
+          <span class="cmd-label">Shell Script — Sign the Package</span>
+          <button class="cmd-copy" onclick="copyCmd(this)">Copy</button>
+        </div>
+        <div class="cmd-body">
+          <code><span class="prompt">$ </span><span class="arg">apksigner</span> <span class="flag">sign</span> <span class="flag">--ks</span> <span class="str">my-release-key.jks</span> <span class="flag">--out</span> <span class="str">final-modded.apk</span> MiniMilitia_Mod.apk</code>
+        </div>
+      </div>
+
+      <div class="cmd-block">
+        <div class="cmd-header">
+          <span class="cmd-label">Shell Script — Verify Signature Integrity</span>
+          <button class="cmd-copy" onclick="copyCmd(this)">Copy</button>
+        </div>
+        <div class="cmd-body">
+          <code><span class="prompt">$ </span><span class="arg">apksigner</span> <span class="flag">verify</span> <span class="str">final-modded.apk</span></code>
+        </div>
+      </div>
+
+      <div class="info-box note">
+        <span class="icon">🔑</span>
+        <p>Signatures must be unique for the user's keystore. Always keep your <code>.jks</code> file secure and backed up.</p>
+      </div>
+    </section>
+
+    <!-- ── Troubleshooting ── -->
+    <section class="section" id="troubleshoot">
+      <h2>
+        <span class="section-icon" style="background:#2a1a2a;">🔧</span>
+        Troubleshooting &amp; Maintenance
+        <span class="section-num">§ 7</span>
+      </h2>
+      <ul class="trouble-list">
+        <li>
+          <div class="issue">⚠️ YAML Metadata Parse Failure</div>
+          <div class="fix">If <code>apktool.yml</code> fails to parse, remove the top line (often a Windows/Linux path conflict).</div>
+        </li>
+        <li>
+          <div class="issue">⚠️ LAN Desync — Ammo Decreases Only for Host</div>
+          <div class="fix">Ensure the <strong>Host</strong> is running the modded APK and that the <code>subAmmo</code> patch is correctly applied with a <code>RET</code>.</div>
+        </li>
+        <li>
+          <div class="issue">⚠️ Installation Failure</div>
+          <div class="fix">Always verify the original game is uninstalled before installing the modded APK. Signatures must be unique for the user's keystore.</div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>Mini Militia Classic — Reverse Engineering Project · v0.14.4 (Classic)</span>
+      <span>Author: Tanvir · May 2024 · Targets: ARM64-v8a &amp; ARMEABI-v7a</span>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+  // Copy button
+  function copyCmd(btn) {
+    const code = btn.closest('.cmd-block').querySelector('code');
+    const text = code.innerText.replace(/^\$ /, '');
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copied';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+
+  // Active nav highlight on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const links = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

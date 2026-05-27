@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "MMC Reverse Engineering Docs"
+version = "1.0.0"
+id = "artifacts/mmc-docs"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22531
+
+[services.development]
+run = "pnpm --filter @workspace/mmc-docs run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mmc-docs", "run", "build" ]
+publicDir = "artifacts/mmc-docs/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22531"
+BASE_PATH = "/"
