@@ -17,10 +17,10 @@ const SectionSummary = forwardRef<HTMLElement, Props>(({ id }, ref) => (
       num="§ 1"
     />
     <p style={{ color: "#c9d1d9", marginBottom: 12, fontSize: 14 }}>
-      This project details the successful reverse engineering and modification of
-      the Mini Militia Classic C++ engine (<strong>libcocos2dcpp.so</strong>). By
+      This project details the reverse engineering and modification of the Mini
+      Militia Classic C++ engine (<strong>libcocos2dcpp.so</strong>). By
       targeting the <em>native layer</em> rather than the Smali/Java layer, we
-      achieved stable, engine-level patches for:
+      achieved engine-level patches for:
     </p>
 
     <div
@@ -35,22 +35,34 @@ const SectionSummary = forwardRef<HTMLElement, Props>(({ id }, ref) => (
         {
           icon: "🔫",
           name: "Unlimited Ammunition",
-          desc: "Ammo count frozen at max — synced across LAN/Multiplayer",
-        },
-        {
-          icon: "⚡",
-          name: "Unlimited Nitro",
-          desc: "Jetpack fuel frozen at 100% — STR instruction replaced with NOP",
+          desc: "Ammo frozen at max — synced across LAN/Multiplayer",
+          status: "✓ Complete",
+          statusColor: "#3fb950",
+          statusBg: "#0d2a1f",
         },
         {
           icon: "🔄",
           name: "Infinite Reserve",
-          desc: "Spare ammo count never decrements on reload",
+          desc: "Spare ammo never decrements on reload",
+          status: "✓ Complete",
+          statusColor: "#3fb950",
+          statusBg: "#0d2a1f",
+        },
+        {
+          icon: "⚡",
+          name: "Unlimited Nitro",
+          desc: "Jetpack frozen at 100% — ARM64 only, ARMv7 pending",
+          status: "⚠️ Partial",
+          statusColor: "#d29922",
+          statusBg: "#2a1f0d",
         },
         {
           icon: "📱",
           name: "Dual Architecture",
-          desc: "Supports 64-bit (ARM64-v8a) and 32-bit (ARMEABI-v7a)",
+          desc: "ARM64 fully patched, ARMv7 nitro offset still needed",
+          status: "⚠️ Partial",
+          statusColor: "#d29922",
+          statusBg: "#2a1f0d",
         },
       ].map((card) => (
         <div
@@ -62,19 +74,54 @@ const SectionSummary = forwardRef<HTMLElement, Props>(({ id }, ref) => (
             padding: "14px 16px",
           }}
         >
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#e6edf3", marginBottom: 4 }}>
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "#e6edf3",
+              marginBottom: 4,
+            }}
+          >
             {card.icon} {card.name}
           </div>
-          <div style={{ fontSize: 12, color: "#8b949e" }}>{card.desc}</div>
+          <div style={{ fontSize: 12, color: "#8b949e", marginBottom: 8 }}>
+            {card.desc}
+          </div>
+          <span
+            style={{
+              fontSize: 10,
+              padding: "2px 8px",
+              borderRadius: 20,
+              fontWeight: 600,
+              background: card.statusBg,
+              color: card.statusColor,
+            }}
+          >
+            {card.status}
+          </span>
         </div>
       ))}
     </div>
 
-    <InfoBox variant="note" icon="ℹ️">
+    <InfoBox variant="warn" icon="⚠️">
       <p>
-        The project specifically addresses challenges in LAN/Multiplayer
-        synchronization and multi-architecture compatibility (supporting both
-        modern 64-bit and legacy 32-bit devices).
+        <strong>Project Status — In Progress:</strong> Ammo and reload patches
+        are complete and work on all devices. The Nitro (jetpack) patch is
+        confirmed working on <strong>ARM64 devices only</strong> (e.g. Nothing
+        Phone 3a Pro). The ARMv7 offset for{" "}
+        <code
+          style={{
+            fontFamily: "monospace",
+            fontSize: 12,
+            background: "#1e2a3a",
+            padding: "1px 5px",
+            borderRadius: 3,
+            color: "#ffa657",
+          }}
+        >
+          SoldierLocalController::setPower
+        </code>{" "}
+        still needs to be located in the armeabi-v7a library.
       </p>
     </InfoBox>
   </section>

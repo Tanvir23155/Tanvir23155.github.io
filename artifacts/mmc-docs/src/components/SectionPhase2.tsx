@@ -43,14 +43,20 @@ const SectionPhase2 = forwardRef<HTMLElement, Props>(({ id }, ref) => (
             width: 12,
             height: 12,
             borderRadius: "50%",
-            background: "#58a6ff",
+            background: "#3fb950",
             border: "2px solid #0d1117",
-            boxShadow: "0 0 0 2px #58a6ff",
+            boxShadow: "0 0 0 2px #3fb950",
           }}
         />
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#58a6ff", margin: "0 0 10px" }}>
-          4.1 — Unlimited Ammunition (LAN/Multiplayer Sync)
-        </h3>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#58a6ff", margin: 0 }}>
+            4.1 — Unlimited Ammunition (LAN/Multiplayer Sync)
+          </h3>
+          <span style={{
+            fontSize: 11, padding: "2px 8px", borderRadius: 20, fontWeight: 600,
+            background: "#0d2a1f", color: "#3fb950",
+          }}>✓ Both Architectures</span>
+        </div>
         <PatchTable
           rows={[
             { label: "Location", value: <Code>Weapon::subAmmo</Code> },
@@ -68,16 +74,16 @@ const SectionPhase2 = forwardRef<HTMLElement, Props>(({ id }, ref) => (
           </p>
           <ul style={{ margin: "8px 0 0 16px", fontSize: 13, color: "#c9d1d9" }}>
             <li>
-              64-bit patch: <Code>C0 03 5F D6</Code>
+              64-bit (ARM64) patch: <Code>C0 03 5F D6</Code>
             </li>
             <li>
-              32-bit patch: <Code>1E FF 2F E1</Code>
+              32-bit (ARMv7) patch: <Code>1E FF 2F E1</Code>
             </li>
           </ul>
           <p style={{ marginTop: 8 }}>
             <strong>Result:</strong> The function returns immediately before
-            subtraction occurs, ensuring ammo counts remain synchronized at
-            maximum across the network.
+            subtraction occurs. Ammo stays at maximum across the network.
+            ✅ Works on both 64-bit and 32-bit devices.
           </p>
         </InfoBox>
       </div>
@@ -92,14 +98,20 @@ const SectionPhase2 = forwardRef<HTMLElement, Props>(({ id }, ref) => (
             width: 12,
             height: 12,
             borderRadius: "50%",
-            background: "#58a6ff",
+            background: "#3fb950",
             border: "2px solid #0d1117",
-            boxShadow: "0 0 0 2px #58a6ff",
+            boxShadow: "0 0 0 2px #3fb950",
           }}
         />
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#58a6ff", margin: "0 0 10px" }}>
-          4.2 — Pro-Style Reloading (Infinite Reserve)
-        </h3>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#58a6ff", margin: 0 }}>
+            4.2 — Pro-Style Reloading (Infinite Reserve)
+          </h3>
+          <span style={{
+            fontSize: 11, padding: "2px 8px", borderRadius: 20, fontWeight: 600,
+            background: "#0d2a1f", color: "#3fb950",
+          }}>✓ Both Architectures</span>
+        </div>
         <PatchTable
           rows={[
             {
@@ -115,14 +127,18 @@ const SectionPhase2 = forwardRef<HTMLElement, Props>(({ id }, ref) => (
             Replace the <strong>BL (Branch Link)</strong> instruction with{" "}
             <strong>NOP</strong>.
           </p>
+          <ul style={{ margin: "8px 0 0 16px", fontSize: 13, color: "#c9d1d9" }}>
+            <li>ARM64 NOP: <Code>1F 20 03 D5</Code></li>
+            <li>ARMv7 NOP: <Code>00 00 A0 E3</Code></li>
+          </ul>
           <p style={{ marginTop: 8 }}>
-            <strong>Result:</strong> The gun reloads and empties its clip
-            normally, but the "Spare Ammo" count never updates/decreases.
+            <strong>Result:</strong> The gun reloads normally, but the "Spare
+            Ammo" count never decreases. ✅ Works on both architectures.
           </p>
         </InfoBox>
       </div>
 
-      {/* 4.3 */}
+      {/* 4.3 — INCOMPLETE */}
       <div style={{ position: "relative", marginBottom: 28 }}>
         <div
           style={{
@@ -132,13 +148,32 @@ const SectionPhase2 = forwardRef<HTMLElement, Props>(({ id }, ref) => (
             width: 12,
             height: 12,
             borderRadius: "50%",
-            background: "#58a6ff",
+            background: "#d29922",
             border: "2px solid #0d1117",
-            boxShadow: "0 0 0 2px #58a6ff",
+            boxShadow: "0 0 0 2px #d29922",
           }}
         />
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#58a6ff", margin: "0 0 10px" }}>
-          4.3 — Unlimited Nitro (Jetpack)
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: "#58a6ff", margin: 0 }}>
+            4.3 — Unlimited Nitro (Jetpack)
+          </h3>
+          <span style={{
+            fontSize: 11, padding: "2px 8px", borderRadius: 20, fontWeight: 600,
+            background: "#2a1f0d", color: "#d29922",
+          }}>⚠️ ARM64 Only — Incomplete</span>
+        </div>
+
+        <InfoBox variant="warn" icon="⚠️">
+          <p>
+            <strong>Known Issue:</strong> The Nitro patch currently only works on{" "}
+            <strong>64-bit (ARM64-v8a)</strong> devices. On 32-bit (ARMv7) devices,
+            the jetpack has no fuel and the player cannot fly. The ARMv7 offset
+            for <Code>SoldierLocalController::setPower</Code> has not yet been identified.
+          </p>
+        </InfoBox>
+
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#58a6ff", margin: "16px 0 8px" }}>
+          ARM64 Patch (Working ✅)
         </h3>
         <PatchTable
           rows={[
@@ -146,21 +181,63 @@ const SectionPhase2 = forwardRef<HTMLElement, Props>(({ id }, ref) => (
               label: "Location",
               value: <Code>SoldierLocalController::setPower</Code>,
             },
-            { label: "Offset", value: <Code>0x009e68c4</Code> },
+            { label: "Architecture", value: "ARM64-v8a only" },
+            { label: "Confirmed Offset", value: <Code>0x009e68c4</Code> },
           ]}
         />
         <InfoBox variant="success" icon="🩹">
           <p>
-            <strong>Patch:</strong> Identify the <strong>STR (Store)</strong>{" "}
-            instruction that writes the fuel value to memory. Replace with{" "}
-            <strong>NOP</strong>.
+            <strong>Patch:</strong> Replace the <strong>STR (Store)</strong>{" "}
+            instruction at offset <Code>0x009e68c4</Code> with{" "}
+            <strong>NOP</strong> <Code>1F 20 03 D5</Code>.
           </p>
           <p style={{ marginTop: 8 }}>
-            <strong>Result:</strong> The update to the fuel variable is skipped;
-            Nitro remains frozen at 100%.
+            <strong>Result:</strong> Fuel value write is skipped; Nitro stays
+            frozen at 100% on 64-bit devices (e.g. Nothing Phone 3a Pro).
           </p>
         </InfoBox>
+
+        <h3 style={{ fontSize: 14, fontWeight: 700, color: "#d29922", margin: "20px 0 8px" }}>
+          ARMv7 Patch (Pending 🔍 — Needs Investigation)
+        </h3>
+        <PatchTable
+          rows={[
+            {
+              label: "Location",
+              value: <Code>SoldierLocalController::setPower</Code>,
+            },
+            { label: "Architecture", value: "ARMEABI-v7a" },
+            { label: "Offset", value: "Unknown — must be found in armeabi-v7a lib" },
+          ]}
+        />
+        <InfoBox variant="note" icon="🔎">
+          <div>
+            <p style={{ marginBottom: 8 }}>
+              <strong>Next Steps to Fix ARMv7:</strong>
+            </p>
+            <ol style={{ margin: "0 0 0 16px", fontSize: 13, color: "#c9d1d9", lineHeight: 1.8 }}>
+              <li>
+                Open the <strong>armeabi-v7a</strong> version of{" "}
+                <Code>libcocos2dcpp.so</Code> in Ghidra (separate from the arm64 lib).
+              </li>
+              <li>
+                Search for the mangled symbol:{" "}
+                <Code>SoldierLocalController::setPower</Code> using the Symbol Table.
+              </li>
+              <li>
+                Inside the function, locate the <strong>STR</strong> instruction
+                that writes the float fuel value to memory (look for a store after
+                the float argument is processed).
+              </li>
+              <li>
+                Note the offset and replace that instruction with ARMv7 NOP:{" "}
+                <Code>00 00 A0 E3</Code>.
+              </li>
+            </ol>
+          </div>
+        </InfoBox>
       </div>
+
     </div>
   </section>
 ));

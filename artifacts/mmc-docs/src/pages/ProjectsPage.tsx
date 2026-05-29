@@ -5,24 +5,30 @@ type Props = {
 const projects = [
   {
     id: "mmc",
-    status: "complete",
-    statusColor: "#3fb950",
-    statusBg: "#0d2a1f",
+    status: "in-progress",
+    statusColor: "#d29922",
+    statusBg: "#2a1f0d",
     tag: "Reverse Engineering",
     tagColor: "#79c0ff",
     tagBg: "#1f3a5f",
     icon: "🔫",
     title: "Mini Militia Classic — Reverse Engineering",
     desc:
-      "Engine-level modification of the Mini Militia Classic C++ native library. Achieved unlimited ammo, nitro, and infinite reserve patches for both ARM64 and ARMv7 architectures via Ghidra.",
+      "Engine-level modification of the Mini Militia Classic C++ native library. Unlimited ammo and reload patches are complete across all architectures. The Nitro (jetpack) patch works on ARM64 but the ARMv7 offset is still pending.",
     tech: ["Ghidra", "ARM Assembly", "Android NDK", "APK Tooling"],
     hasDocs: true,
+    progress: [
+      { label: "Unlimited Ammo", done: true },
+      { label: "Infinite Reserve", done: true },
+      { label: "Nitro — ARM64", done: true },
+      { label: "Nitro — ARMv7", done: false },
+    ],
   },
   {
     id: "embedded-placeholder",
-    status: "in-progress",
-    statusColor: "#d29922",
-    statusBg: "#2a1f0d",
+    status: "planned",
+    statusColor: "#8b949e",
+    statusBg: "#21262d",
     tag: "Embedded Systems",
     tagColor: "#ffa657",
     tagBg: "#2a1a0a",
@@ -32,6 +38,7 @@ const projects = [
       "Currently learning embedded systems and firmware development. Projects will be documented here as they progress.",
     tech: ["C", "Microcontrollers", "Firmware"],
     hasDocs: false,
+    progress: [],
   },
 ];
 
@@ -63,8 +70,8 @@ export default function ProjectsPage({ onOpenDocs }: Props) {
           Projects
         </h1>
         <p style={{ fontSize: 14, color: "#8b949e", maxWidth: 540 }}>
-          Personal projects, research, and reverse engineering work. Click "View Docs"
-          to read the full technical write-up.
+          Personal projects, research, and reverse engineering work. Click "View
+          Docs" to read the full technical write-up.
         </p>
       </div>
 
@@ -130,7 +137,11 @@ export default function ProjectsPage({ onOpenDocs }: Props) {
                       color: p.statusColor,
                     }}
                   >
-                    {p.status === "complete" ? "✓ Complete" : "⏳ In Progress"}
+                    {p.status === "in-progress"
+                      ? "⏳ In Progress"
+                      : p.status === "planned"
+                      ? "📅 Planned"
+                      : "✓ Complete"}
                   </span>
                 </div>
 
@@ -154,6 +165,35 @@ export default function ProjectsPage({ onOpenDocs }: Props) {
                 >
                   {p.desc}
                 </p>
+
+                {/* Progress checklist */}
+                {p.progress.length > 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 8,
+                      marginBottom: 14,
+                    }}
+                  >
+                    {p.progress.map((item) => (
+                      <span
+                        key={item.label}
+                        style={{
+                          fontSize: 11,
+                          padding: "3px 10px",
+                          borderRadius: 6,
+                          fontWeight: 600,
+                          background: item.done ? "#0d2a1f" : "#2a1f0d",
+                          color: item.done ? "#3fb950" : "#d29922",
+                          border: `1px solid ${item.done ? "#1a4a2a" : "#4a3010"}`,
+                        }}
+                      >
+                        {item.done ? "✓" : "○"} {item.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 {/* Tech tags */}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -194,10 +234,12 @@ export default function ProjectsPage({ onOpenDocs }: Props) {
                       transition: "all 0.15s",
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background = "#264f78";
+                      (e.currentTarget as HTMLButtonElement).style.background =
+                        "#264f78";
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.background = "#1f3a5f";
+                      (e.currentTarget as HTMLButtonElement).style.background =
+                        "#1f3a5f";
                     }}
                   >
                     📄 View Docs
@@ -209,7 +251,7 @@ export default function ProjectsPage({ onOpenDocs }: Props) {
         ))}
       </div>
 
-      {/* CTA to add more */}
+      {/* CTA */}
       <div
         style={{
           marginTop: 32,

@@ -6,7 +6,21 @@ type Props = { id: string };
 
 const issues = [
   {
+    title: "⚠️ Nitro / Jetpack Not Working on Some Devices",
+    severity: "high" as const,
+    fix: (
+      <>
+        The Nitro patch is currently <strong>ARM64-only</strong>. Devices running
+        the 32-bit (ARMv7) library will have no jetpack fuel. The ARMv7 offset for{" "}
+        <Code>SoldierLocalController::setPower</Code> still needs to be identified
+        in Ghidra using the armeabi-v7a library. See Phase II §4.3 for detailed
+        next steps.
+      </>
+    ),
+  },
+  {
     title: "⚠️ YAML Metadata Parse Failure",
+    severity: "medium" as const,
     fix: (
       <>
         If <Code>apktool.yml</Code> fails to parse, remove the top line (often a
@@ -16,6 +30,7 @@ const issues = [
   },
   {
     title: "⚠️ LAN Desync — Ammo Decreases Only for Host",
+    severity: "medium" as const,
     fix: (
       <>
         Ensure the <strong>Host</strong> is running the modded APK and that the{" "}
@@ -25,9 +40,15 @@ const issues = [
   },
   {
     title: "⚠️ Installation Failure",
+    severity: "medium" as const,
     fix: "Always verify the original game is uninstalled before installing the modded APK. Signatures must be unique for the user's keystore.",
   },
 ];
+
+const severityStyles = {
+  high: { border: "#f85149", bg: "#2a0d0d" },
+  medium: { border: "#d29922", bg: "#21262d" },
+};
 
 const SectionTroubleshoot = forwardRef<HTMLElement, Props>(({ id }, ref) => (
   <section
@@ -46,8 +67,9 @@ const SectionTroubleshoot = forwardRef<HTMLElement, Props>(({ id }, ref) => (
         <li
           key={i}
           style={{
-            background: "#21262d",
-            border: "1px solid #30363d",
+            background: severityStyles[item.severity].bg,
+            border: `1px solid #30363d`,
+            borderLeft: `4px solid ${severityStyles[item.severity].border}`,
             borderRadius: 8,
             padding: "14px 16px",
             marginBottom: 10,
@@ -55,7 +77,11 @@ const SectionTroubleshoot = forwardRef<HTMLElement, Props>(({ id }, ref) => (
           }}
         >
           <div
-            style={{ fontWeight: 700, color: "#d29922", marginBottom: 4 }}
+            style={{
+              fontWeight: 700,
+              color: item.severity === "high" ? "#f85149" : "#d29922",
+              marginBottom: 6,
+            }}
           >
             {item.title}
           </div>
