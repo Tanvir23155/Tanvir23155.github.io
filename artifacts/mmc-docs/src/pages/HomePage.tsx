@@ -156,7 +156,7 @@ export default function HomePage({ onNavigate }: Props) {
             View Projects →
           </button>
           <a
-            href="mailto:your@email.com"
+            href="mailto:musfiqurrahman2456@gmail.com"
             style={{
               background: "transparent",
               color: "#e6edf3",
