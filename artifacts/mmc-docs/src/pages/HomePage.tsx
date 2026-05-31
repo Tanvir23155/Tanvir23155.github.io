@@ -178,7 +178,34 @@ export default function HomePage({ onNavigate }: Props) {
                 "#30363d")
             }
           >
-            Contact Me
+            ✉️ Contact Me
+          </a>
+          <a
+            href="https://github.com/Tanvir23155"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: "transparent",
+              color: "#e6edf3",
+              border: "1px solid #30363d",
+              borderRadius: 8,
+              padding: "10px 24px",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: "pointer",
+              textDecoration: "none",
+              transition: "border-color 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.borderColor =
+                "#e6edf3")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLAnchorElement).style.borderColor =
+                "#30363d")
+            }
+          >
+            🐙 GitHub
           </a>
         </div>
       </div>

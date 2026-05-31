@@ -1,9 +1,15 @@
-type Page = "home" | "projects";
+type Page = "home" | "projects" | "contact";
 
 type Props = {
   currentPage: string;
   onNavigate: (page: Page) => void;
 };
+
+const navLinks: { id: Page; label: string }[] = [
+  { id: "home", label: "Home" },
+  { id: "projects", label: "Projects" },
+  { id: "contact", label: "Contact" },
+];
 
 export default function Navbar({ currentPage, onNavigate }: Props) {
   return (
@@ -62,10 +68,10 @@ export default function Navbar({ currentPage, onNavigate }: Props) {
       </button>
 
       {/* Nav links */}
-      {(["home", "projects"] as Page[]).map((p) => (
+      {navLinks.map((link) => (
         <button
-          key={p}
-          onClick={() => onNavigate(p)}
+          key={link.id}
+          onClick={() => onNavigate(link.id)}
           style={{
             background: "none",
             border: "none",
@@ -73,14 +79,23 @@ export default function Navbar({ currentPage, onNavigate }: Props) {
             padding: "8px 16px",
             fontSize: 14,
             fontWeight: 500,
-            color: currentPage === p ? "#e6edf3" : "#8b949e",
-            borderBottom: `2px solid ${currentPage === p ? "#58a6ff" : "transparent"}`,
+            color: currentPage === link.id ? "#e6edf3" : "#8b949e",
+            borderBottom: `2px solid ${
+              currentPage === link.id ? "#58a6ff" : "transparent"
+            }`,
             transition: "all 0.15s",
-            textTransform: "capitalize",
             height: 56,
           }}
+          onMouseEnter={(e) => {
+            if (currentPage !== link.id)
+              (e.currentTarget as HTMLButtonElement).style.color = "#e6edf3";
+          }}
+          onMouseLeave={(e) => {
+            if (currentPage !== link.id)
+              (e.currentTarget as HTMLButtonElement).style.color = "#8b949e";
+          }}
         >
-          {p === "home" ? "Home" : "Projects"}
+          {link.label}
         </button>
       ))}
     </nav>

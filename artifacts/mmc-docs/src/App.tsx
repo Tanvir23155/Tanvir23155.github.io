@@ -2,9 +2,10 @@ import { useState } from "react";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import ProjectsPage from "./pages/ProjectsPage";
+import ContactPage from "./pages/ContactPage";
 import DocsPage from "./pages/DocsPage";
 
-export type Page = "home" | "projects" | "docs";
+export type Page = "home" | "projects" | "contact" | "docs";
 
 function App() {
   const [page, setPage] = useState<Page>("home");
@@ -22,6 +23,7 @@ function App() {
       )}
       {page === "home" && <HomePage onNavigate={(p) => setPage(p as Page)} />}
       {page === "projects" && <ProjectsPage onOpenDocs={openDocs} />}
+      {page === "contact" && <ContactPage />}
       {page === "docs" && (
         <DocsPage
           projectId={docsProject}
