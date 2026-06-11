@@ -1,4 +1,19 @@
-const contacts = [
+import GitHubLogo from "../components/GitHubLogo";
+
+type Contact = {
+  id: string;
+  icon: string | "github";
+  label: string;
+  value: string;
+  href: string | null;
+  desc: string;
+  color: string;
+  bg: string;
+  border: string;
+  active: boolean;
+};
+
+const contacts: Contact[] = [
   {
     id: "email",
     icon: "✉️",
@@ -13,7 +28,7 @@ const contacts = [
   },
   {
     id: "github",
-    icon: "🐙",
+    icon: "github",
     label: "GitHub",
     value: "github.com/Tanvir23155",
     href: "https://github.com/Tanvir23155",
@@ -73,6 +88,13 @@ const contacts = [
   },
 ];
 
+function ContactIcon({ icon, color }: { icon: string; color: string }) {
+  if (icon === "github") {
+    return <GitHubLogo size={22} color={color} />;
+  }
+  return <span style={{ fontSize: 20 }}>{icon}</span>;
+}
+
 export default function ContactPage() {
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 40px 80px" }}>
@@ -120,11 +142,12 @@ export default function ContactPage() {
               alignItems: "center",
               gap: 18,
               opacity: c.active ? 1 : 0.55,
-              transition: "border-color 0.15s, opacity 0.15s",
+              transition: "border-color 0.15s",
             }}
             onMouseEnter={(e) => {
               if (c.active)
-                (e.currentTarget as HTMLDivElement).style.borderColor = "#444c56";
+                (e.currentTarget as HTMLDivElement).style.borderColor =
+                  "#444c56";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLDivElement).style.borderColor = c.border;
@@ -141,11 +164,10 @@ export default function ContactPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: 20,
                 flexShrink: 0,
               }}
             >
-              {c.icon}
+              <ContactIcon icon={c.icon} color={c.active ? c.color : "#8b949e"} />
             </div>
 
             {/* Info */}
@@ -179,7 +201,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Action button */}
+            {/* Action */}
             {c.active && c.href && (
               <a
                 href={c.href}
@@ -189,7 +211,7 @@ export default function ContactPage() {
                   flexShrink: 0,
                   background: "#21262d",
                   color: c.color,
-                  border: `1px solid #30363d`,
+                  border: "1px solid #30363d",
                   borderRadius: 8,
                   padding: "8px 18px",
                   fontSize: 13,

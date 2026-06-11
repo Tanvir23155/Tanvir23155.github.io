@@ -3,7 +3,7 @@ import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ContactPage from "./pages/ContactPage";
-import DocsPage from "./pages/DocsPage";
+import DocsPageGuide from "./pages/DocsPageGuide";
 
 export type Page = "home" | "projects" | "contact" | "docs";
 
@@ -25,8 +25,7 @@ function App() {
       {page === "projects" && <ProjectsPage onOpenDocs={openDocs} />}
       {page === "contact" && <ContactPage />}
       {page === "docs" && (
-        <DocsPage
-          projectId={docsProject}
+        <DocsPageGuide
           onBack={() => setPage("projects")}
         />
       )}
